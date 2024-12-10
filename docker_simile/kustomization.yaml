@@ -1,0 +1,112 @@
+apiVersion: v1
+data:
+  application.properties: FOO=Bar
+kind: ConfigMap
+metadata:
+  name: qgis-configmap-mh9c5264dd
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qgis-exec-server
+  namespace: default
+spec:
+  ports:
+  - port: 5555
+    targetPort: 5555
+  selector:
+    myLabel: qgis-exec-server
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qgis-nginx
+  namespace: default
+spec:
+  ports:
+  - nodePort: 30080
+    port: 80
+    targetPort: 80
+  selector:
+    myLabel: qgis-nginx
+  type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qgis-server
+  namespace: default
+spec:
+  ports:
+  - port: 5555
+    targetPort: 5555
+  selector:
+    myLabel: qgis-server
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qgis-nginx
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      myLabel: qgis-nginx
+  template:
+    metadata:
+      labels:
+        myLabel: qgis-nginx
+    spec:
+      containers:
+      - image: nginx:1.13
+        name: qgis-nginx
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - mountPath: /etc/nginx/conf.d/default.conf
+          name: nginx-conf
+      volumes:
+      - hostPath:
+          path: C:\Users\Elitebook\Documents\GitHub\docker_simile\qgis-server\nginx.conf
+        name: nginx-conf
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qgis-server
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      myLabel: qgis-server
+  template:
+    metadata:
+      labels:
+        myLabel: qgis-server
+    spec:
+      containers:
+      - env:
+        - name: LANG
+          value: en_EN.UTF-8
+        - name: QGIS_PROJECT_FILE
+          value: /data/Cartografia_base.qgz
+        - name: QGIS_SERVER_LOG_LEVEL
+          value: "0"
+        - name: DEBUG
+          value: "1"
+        image: localhost:32000/qgis-server:latest
+        imagePullPolicy: IfNotPresent
+        name: qgis-server
+        ports:
+        - containerPort: 5555
+        volumeMounts:
+        - mountPath: /data/
+          name: qgis-data
+      volumes:
+      - hostPath:
+          path: C:\Users\Elitebook\Documents\GitHub\docker_simile\qgis-server\data
+        name: qgis-data
