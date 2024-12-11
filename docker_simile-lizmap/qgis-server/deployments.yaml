@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qgis-server
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      myLabel: qgis-server
+  template:
+    metadata:
+      labels:
+        myLabel: qgis-server
+    spec:
+      containers:
+        - name: qgis-server
+          image: qgis-server:latest
+          imagePullPolicy: Never
+          env:
+            - name: LANG
+              value: en_EN.UTF-8
+            - name: QGIS_PROJECT_FILE
+              value: /data/Cartografia_base.qgz
+            - name: QGIS_SERVER_LOG_LEVEL
+              value: "2"
+            - name: DEBUG
+              value: "1"
+          ports:
+            - containerPort: 5555
+          volumeMounts:
+            - mountPath: /data
+              name: qgis-data
+      volumes:
+        - name: qgis-data
+          hostPath:
+            path: "/run/desktop/mnt/host/c/Users/Elitebook/Documents/GitHub/docker_simile/qgis-server/data"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qgis-nginx
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      myLabel: qgis-nginx
+  template:
+    metadata:
+      labels:
+        myLabel: qgis-nginx
+    spec:
+      containers:
+        - name: qgis-nginx
+          image: nginx:1.13
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - mountPath: /etc/nginx/conf.d/default.conf
+              #subPath: default.conf
+              name: nginx-conf
+      volumes:
+        - name: nginx-conf
+          hostPath:
+            path: "/run/desktop/mnt/host/c/Users/Elitebook/Documents/GitHub/docker_simile/qgis-server/nginx.conf"
+            #path: "/host_mnt/c/Elitebook/Documents/GitHub/docker_simile/qgis-server/nginx-conf/nginx.conf"

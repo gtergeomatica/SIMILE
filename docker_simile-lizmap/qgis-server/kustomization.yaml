@@ -1,0 +1,7 @@
+resources:
+- .\deployments.yaml
+- .\service.yaml
+#configMapGenerator:
+#- name: qgis-configmap
+#  files:
+#  - application.properties

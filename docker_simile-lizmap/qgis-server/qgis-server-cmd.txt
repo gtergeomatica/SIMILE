@@ -1,0 +1,20 @@
+//seguito tutorial qui https://docs.qgis.org/3.16/en/docs/server_manual/containerized_deployment.htmldocker
+
+//crea l'immagine di qgis-server
+docker build -f Dockerfile -t qgis-server ./
+
+//crea l'immagine di lizmap
+docker build -f Dockerfile -t lizmap ./
+
+docker network create qgis
+
+docker run -d --rm --name qgis-server --net=qgis --hostname=qgis-server -v C:\Users\Elitebook\Documents\GitHub\docker_simile\qgis-server\data:/data:ro -p 5555:5555 -e "QGIS_PROJECT_FILE=/data/Cartografia_base.qgz" qgis-server
+
+docker run -d --rm --name nginx --net=qgis --hostname=nginx -v C:\Users\Elitebook\Documents\GitHub\docker_simile\qgis-server\nginx.conf:/etc/nginx/conf.d/default.conf:ro -p 8080:80 nginx:1.13
+
+// usiamo kubernetes come orchestrator (creati file deployments.yaml e service.yaml ricorda su linux di modificare i percorsi)
+kubectl kustomize .\
+kubectl apply -k ./
+//per debug kubernetes
+kubectl describe pod > .\runbooks_describe_pod.txt
+

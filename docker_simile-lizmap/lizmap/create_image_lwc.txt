@@ -1,0 +1,21 @@
+##########FATTO SU UBUNTU DEL MIO PC WINDOWS#################
+## clono la repository lizmap
+git clone https://github.com/3liz/lizmap-web-client.git
+## installare make
+sudo apt install make
+## installare php composer
+sudo apt update
+sudo apt install wget php-cli php-zip unzip
+sudo apt-get install zip
+wget -O composer-setup.php https://getcomposer.org/installer
+sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+##installare la libreria php-simplexml
+sudo apt-get install -y php-simplexml
+##installare nodejs
+sudo apt install nodejs
+##installare npm
+sudo apt install npm
+##compilare lizmap
+cd lizmap-web-client
+make build
+make docker-build
